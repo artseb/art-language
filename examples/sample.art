@@ -1,0 +1,132 @@
+// sample.art -- exercises every feature currently supported
+
+import "utils.art" as Utils
+
+print(Utils.square("ab"))
+
+print("5")
+
+local p = Utils.Point()
+p.x = 3
+p.y = 4
+p.describe()
+
+local x = 5
+local y = 10
+print(x + y)
+
+local list = [1, 2, 3]
+local dict = ["key" = "value", "count" = 42]
+print(list)
+print(dict)
+
+fun greet(name) {
+    print("Hello, " + name)
+}
+
+fun greet(name: String, age: Int) {
+    print("Hello, " + name + ", age " + age)
+}
+
+greet("artseb")
+greet("artseb", 5)
+
+class Animal {
+    local name = "Animal"
+
+    fun speak() {
+        print(name + " makes a sound")
+    }
+}
+
+class Dog extends Animal implements Speaker {
+    fun speak() {
+        print(name + " barks")
+    }
+}
+
+local a = Animal()
+a.speak()
+
+local d = Dog()
+d.name = "Rex"
+d.speak()
+
+class Zoo {
+    local class Cage {
+        fun open() {
+            print("Cage opened")
+        }
+    }
+
+    fun makeCage() {
+        return Cage()
+    }
+}
+
+local zoo = Zoo()
+local cage = zoo.makeCage()
+cage.open()
+
+// control flow
+local i = 0
+while (i < 3) {
+    print("i = " + i)
+    i = i + 1
+}
+
+if (x > y) {
+    print("x is bigger")
+} else {
+    print("y is bigger")
+}
+
+local score = 75
+
+if (score >= 90) {
+    print("A")
+} else if (score >= 80) {
+    print("B")
+} else if (score >= 70) {
+    print("C")
+} else {
+    print("F")
+}
+
+local list = [10, 20, 30]
+
+print(list[1])
+print(list[2])
+print(list[3])
+
+list[2] = 999
+
+print(list[2])
+
+local dict = ["name" = "Seb", "age" = 21]
+
+print(dict["name"])
+print(dict["age"])
+
+dict["age"] = 22
+
+print(dict["age"])
+
+print(true and true)
+print(true and false)
+print(false or true)
+print(false or false)
+
+print(5 > 2 and 10 > 3)
+print(5 < 2 or 10 > 3)
+
+local a = nil or "fallback"
+print(a)
+
+local b = "hello" and "world"
+print(b)
+
+print(false and 5)
+print(true or 5)
+
+local i = 0

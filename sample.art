@@ -1,0 +1,22 @@
+class Entity {
+    fun Speak(...text: String) {
+        print(text[1])
+    }
+}
+
+class Player extends Entity {
+    local name = nil
+
+    fun Player(name: String) {
+        this.name = name
+    }
+
+    fun Speak(...text: String) {
+        super.Speak(text)
+        print(this.name + " says:")
+    }
+}
+
+
+local plr = Player("Encry")
+plr.Speak("Hello World!")

@@ -1,0 +1,170 @@
+enum Element {
+    FIRE(1.5),
+    WATER(1.5),
+    EARTH(1.5),
+
+    fun Element(power) {
+        this.power = power
+    }
+}
+
+fun elementAdvantage(attacker, defender) {
+    if (attacker == Element.FIRE and defender == Element.EARTH) {
+        return attacker.power
+    } else if (attacker == Element.WATER and defender == Element.FIRE) {
+        return attacker.power
+    } else if (attacker == Element.EARTH and defender == Element.WATER) {
+        return attacker.power
+    }
+    return 1
+}
+
+class Fighter {
+    static totalFighters = 0
+
+    local health = 0
+    local maxHealth = 0
+
+    fun Fighter(name, maxHealth, element) {
+        this.name = name
+        this.maxHealth = maxHealth
+        health = maxHealth
+        this.element = element
+        Fighter.totalFighters = Fighter.totalFighters + 1
+    }
+
+    get health() {
+        return health
+    }
+
+    set health(value) {
+        if (value < 0) {
+            health = 0
+        } else if (value > maxHealth) {
+            health = maxHealth
+        } else {
+            health = value
+        }
+    }
+
+    fun isAlive() {
+        return health > 0
+    }
+
+    fun takeDamage(amount) {
+        this.health = health - amount
+    }
+
+    operator <(other) {
+        return health < other.health
+    }
+
+    fun describe() {
+        print(this.name + ": " + health + "/" + maxHealth + " HP")
+    }
+}
+
+class Hero extends Fighter {
+    local mana = 30
+
+    fun Hero(name, maxHealth, element) {
+        super(name, maxHealth, element)
+    }
+
+    fun castSpell(target, log) {
+        if (mana < 10) {
+            log("out of mana, throws a punch instead")
+            target.takeDamage(5)
+            return
+        }
+
+        mana = mana - 10
+        local multiplier = elementAdvantage(this.element, target.element)
+        local damage = 15 * multiplier
+
+        log("casts a spell for " + damage + " damage")
+        target.takeDamage(damage)
+    }
+}
+
+class Monster extends Fighter {
+    fun Monster(name, maxHealth, element) {
+        super(name, maxHealth, element)
+    }
+
+    fun claw(target, log) {
+        local multiplier = elementAdvantage(this.element, target.element)
+        local damage = 12 * multiplier
+
+        log("claws for " + damage + " damage")
+        target.takeDamage(damage)
+    }
+}
+
+// A closure-based logger: each call returns a fresh, independent counter.
+fun makeLogger(label) {
+    local turn = 0
+
+    return fun(message) {
+        turn = turn + 1
+        print("[" + label + " turn " + turn + "] " + message)
+    }
+}
+
+local hero = Hero("Seb", 80, Element.WATER)
+local monster = Monster("Ashfang", 70, Element.FIRE)
+
+local heroLog = makeLogger(hero.name)
+local monsterLog = makeLogger(monster.name)
+
+print("A wild " + monster.name + " appears!")
+hero.describe()
+monster.describe()
+print("---")
+
+local round = 0
+
+while (hero.isAlive() and monster.isAlive()) {
+    round = round + 1
+
+    // every third round the hero saves mana and just claws instead
+    switch (round) {
+        case 3:
+            heroLog("holds back to save mana")
+        else:
+            hero.castSpell(monster, heroLog)
+    }
+
+    if (!monster.isAlive()) {
+        break
+    }
+
+    monster.claw(hero, monsterLog)
+}
+
+print("---")
+
+if (hero.isAlive()) {
+    print(hero.name + " wins!")
+} else {
+    print(monster.name + " wins!")
+}
+
+hero.describe()
+monster.describe()
+
+print("Fighters created this battle: " + Fighter.totalFighters)
+
+// a quick tour of tables, both as an array and as a dict
+local dropTable = ["Ember Shard", "Waterlogged Boot", "Small Gem"]
+local inventory = ["potions" = 3, "gold" = 42]
+
+print("Loot pool:")
+for (local index, item in dropTable) {
+    print("  " + index + ". " + item)
+}
+
+print("Inventory:")
+for (local key, value in inventory) {
+    print("  " + key + " = " + value)
+}
