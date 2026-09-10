@@ -52,7 +52,6 @@ class Call(Node):
         return f"Call({self.callee!r}, {self.args!r})"
 
 class Get(Node):
-    """Property/method access: obj.name"""
     def __init__(self, obj, name):
         self.obj = obj
         self.name = name
@@ -61,7 +60,6 @@ class Get(Node):
         return f"Get({self.obj!r}.{self.name})"
 
 class Set(Node):
-    """Property assignment: obj.name = value"""
     def __init__(self, obj, name, value):
         self.obj = obj
         self.name = name
@@ -72,12 +70,6 @@ class Set(Node):
 
 
 class TableLiteral(Node):
-    """
-    Unified array/dict literal.
-    entries is a list of (key_or_None, value_expr) pairs.
-    key_or_None is None for plain array-style entries: [1, 2, 3]
-    key_or_None is an expr for dict-style entries: ["key" = "value"]
-    """
     def __init__(self, entries):
         self.entries = entries
 
@@ -85,7 +77,6 @@ class TableLiteral(Node):
         return f"TableLiteral({self.entries!r})"
 
 class Index(Node):
-    """Index access: obj[index]"""
     def __init__(self, obj, index):
         self.obj = obj
         self.index = index
@@ -95,7 +86,6 @@ class Index(Node):
 
 
 class IndexSet(Node):
-    """Index assignment: obj[index] = value"""
     def __init__(self, obj, index, value):
         self.obj = obj
         self.index = index

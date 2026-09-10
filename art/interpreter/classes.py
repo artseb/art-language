@@ -29,9 +29,6 @@ class ClassMixin:
             elif isinstance(member, ExpressionStmt) and isinstance(member.expr, Assign):
                 assign = member.expr
                 if assign.is_static:
-                    # Static fields are shared by the class itself, not
-                    # copied per-instance, so they're evaluated once, right
-                    # here, instead of being deferred to _instantiate().
                     klass.static_fields[assign.name] = self._eval(assign.value, class_env)
                 else:
                     klass.field_inits[assign.name] = assign.value

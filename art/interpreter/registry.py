@@ -3,7 +3,6 @@ EVAL_HANDLERS = {}
 
 
 def exec_handler(*node_classes):
-    """Register a statement handler: fn(interp, node, env) -> None."""
     def decorator(fn):
         for node_class in node_classes:
             if node_class in EXEC_HANDLERS:
@@ -17,7 +16,6 @@ def exec_handler(*node_classes):
 
 
 def eval_handler(*node_classes):
-    """Register an expression handler: fn(interp, node, env) -> value."""
     def decorator(fn):
         for node_class in node_classes:
             if node_class in EVAL_HANDLERS:

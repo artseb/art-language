@@ -192,11 +192,6 @@ class Parser:
         return FunDecl(name, params, body, is_local, return_type)
 
     def _parse_param_list(self, context):
-        """Parse a parenthesized, comma-separated parameter list, shared by
-        named functions (`fun name(...)`) and lambdas (`fun (...)`).
-        `context` is only used to make error messages ("function" /
-        "anonymous function") say where the problem is.
-        """
         self._consume(TokenType.LPAREN, f"Expected '(' to start the {context} parameter list")
 
         params = []

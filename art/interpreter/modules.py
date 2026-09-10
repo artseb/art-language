@@ -34,12 +34,6 @@ class ModuleMixin:
             os.path.join(self.base_dir, rel_path)
         )
 
-        # Path-traversal guard: without this, a script could do
-        # `import "../../../etc/passwd.art"` (or follow a symlink that
-        # points outside the project) and have an arbitrary file on disk
-        # read and fed straight to the lexer/parser. Confine every import
-        # to the project's base directory (the folder the entry script
-        # lives in).
         if os.path.commonpath([base_dir_real, candidate_real]) != base_dir_real:
             raise LangRuntimeError(
                 f"Cannot import '{rel_path}': path escapes the project directory"

@@ -1,8 +1,6 @@
 from ..errors import LangRuntimeError
 
 class LangModule:
-    """A namespaced import: `import "utils.art" as Utils` -> Utils.helper()"""
-
     def __init__(self, name, exports: dict):
         self.name = name
         self.exports = exports

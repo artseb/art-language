@@ -52,7 +52,6 @@ class While(Node):
 
 
 class Param(Node):
-    """A function parameter, with optional type, default, and variadic flag."""
     def __init__(self, name, type_name, default=None, variadic=False):
         self.name = name
         self.type_name = type_name
@@ -97,7 +96,6 @@ class ClassDecl(Node):
 
 
 class Import(Node):
-    """import "path/to/file.art" [as Alias]"""
     def __init__(self, path, alias):
         self.path = path    # str, the raw string literal (a file path)
         self.alias = alias  # str or None

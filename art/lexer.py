@@ -17,8 +17,6 @@ class Lexer:
         self.tokens.append(Token(TokenType.EOF, "", None, self.line))
         return self.tokens
 
-    # --- helpers ---
-
     def _at_end(self):
         return self.current >= len(self.source)
 

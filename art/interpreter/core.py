@@ -9,9 +9,6 @@ from .classes import ClassMixin
 from .modules import ModuleMixin
 from .switching import SwitchMixin
 
-# Importing these packages runs every handler module inside them once,
-# which is what actually populates EXEC_HANDLERS / EVAL_HANDLERS above -
-# see statements/__init__.py and expressions/__init__.py.
 from . import statements as _statements  # noqa: F401  (registration side effect)
 from . import expressions as _expressions  # noqa: F401  (registration side effect)
 
@@ -42,8 +39,6 @@ class Interpreter(CallingMixin, ClassMixin, ModuleMixin, SwitchMixin):
         if handler is None:
             raise LangRuntimeError(f"No eval handler for {type(node).__name__}")
         return handler(self, node, env)
-
-    # ---------- small value helpers shared across many handlers ----------
 
     def _truthy(self, value):
         if value is None:

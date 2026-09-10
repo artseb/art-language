@@ -1,4 +1,3 @@
-"""Console output builtins."""
 from . import native
 from ..runtime.values import stringify
 

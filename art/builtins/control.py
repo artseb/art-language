@@ -1,18 +1,9 @@
-"""Control-flow-ish builtins that need to call back into the interpreter
-(as opposed to `io.py`, which is pure Python once it has its arguments)."""
 from . import native
 from ..errors import LangRuntimeError
 
 
 @native("attempt")
 def _attempt(interp, args):
-    """attempt(callee, ...args) -> (result, error_message)
-
-    Calls `callee` with the remaining arguments and never lets a
-    LangRuntimeError propagate; instead it comes back as the second
-    element of the returned pair, `nil` on success. ART code typically
-    unpacks it: `local ok, err = attempt(risky, 1, 2)`.
-    """
     if not args:
         raise LangRuntimeError("attempt() expects at least 1 argument")
 

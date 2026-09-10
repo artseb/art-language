@@ -1,6 +1,4 @@
 class Node:
-    """Base class for all ART AST nodes."""
-
     def __init__(self, token=None):
         self.token = token
 
