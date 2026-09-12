@@ -1,0 +1,120 @@
+{
+  "Function declaration": {
+    "prefix": "fun",
+    "body": ["fun ${1:name}(${2:params}) {", "\t$0", "}"],
+    "description": "Declare a function"
+  },
+  "Function with return type": {
+    "prefix": "funt",
+    "body": ["fun ${1:name}(${2:params}) -> ${3:Type} {", "\treturn $0", "}"],
+    "description": "Declare a function with a return type"
+  },
+  "Anonymous function": {
+    "prefix": "lambda",
+    "body": ["fun(${1:params}) {", "\t$0", "}"],
+    "description": "Anonymous function / closure"
+  },
+  "Class declaration": {
+    "prefix": "class",
+    "body": [
+      "class ${1:Name} {",
+      "\tfun ${1:Name}(${2:params}) {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Class with a constructor"
+  },
+  "Subclass declaration": {
+    "prefix": "classx",
+    "body": [
+      "class ${1:Name} extends ${2:Parent} {",
+      "\tfun ${1:Name}(${3:params}) {",
+      "\t\tsuper(${3:params})",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Class extending another class"
+  },
+  "Getter": {
+    "prefix": "get",
+    "body": ["get ${1:name}() {", "\treturn ${1:name}", "}"],
+    "description": "Property getter"
+  },
+  "Setter": {
+    "prefix": "set",
+    "body": ["set ${1:name}(value) {", "\t${1:name} = value", "}"],
+    "description": "Property setter"
+  },
+  "Operator overload": {
+    "prefix": "operator",
+    "body": ["operator ${1:<}(other) {", "\treturn $0", "}"],
+    "description": "Operator overload"
+  },
+  "Enum declaration": {
+    "prefix": "enum",
+    "body": [
+      "enum ${1:Name} {",
+      "\t${2:MEMBER}(${3:value}),",
+      "",
+      "\tfun ${1:Name}(${4:param}) {",
+      "\t\tthis.${4:param} = ${4:param}",
+      "\t}",
+      "}"
+    ],
+    "description": "Enum with a constructor"
+  },
+  "If statement": {
+    "prefix": "if",
+    "body": ["if (${1:condition}) {", "\t$0", "}"],
+    "description": "If statement"
+  },
+  "If/else statement": {
+    "prefix": "ife",
+    "body": ["if (${1:condition}) {", "\t$2", "} else {", "\t$0", "}"],
+    "description": "If/else statement"
+  },
+  "While loop": {
+    "prefix": "while",
+    "body": ["while (${1:condition}) {", "\t$0", "}"],
+    "description": "While loop"
+  },
+  "For-in loop": {
+    "prefix": "for",
+    "body": ["for (local ${1:key}, ${2:value} in ${3:table}) {", "\t$0", "}"],
+    "description": "Iterate over a table"
+  },
+  "Switch statement": {
+    "prefix": "switch",
+    "body": [
+      "switch (${1:value}) {",
+      "\tcase ${2:match}:",
+      "\t\t$0",
+      "\telse:",
+      "\t\t",
+      "}"
+    ],
+    "description": "Switch statement"
+  },
+  "Import module": {
+    "prefix": "import",
+    "body": ["import \"${1:module.art}\" as ${2:Alias}"],
+    "description": "Import another ART file"
+  },
+  "Local variable": {
+    "prefix": "local",
+    "body": ["local ${1:name} = ${0:nil}"],
+    "description": "Declare a local variable"
+  },
+  "Attempt (error handling)": {
+    "prefix": "attempt",
+    "body": ["local ${1:result}, ${2:err} = attempt(${3:callee}${4:, args})"],
+    "description": "Call a function, capturing any runtime error message"
+  },
+  "Print": {
+    "prefix": "print",
+    "body": ["print(${1:value})"],
+    "description": "Print a value"
+  }
+}

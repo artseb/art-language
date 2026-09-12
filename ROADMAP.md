@@ -65,8 +65,8 @@ The stuff that makes it feel like *a language*, not *a script you run*.
 - [ ] REPL
 - [ ] Formatter
 - [ ] Test runner / assertion library
-- [ ] Syntax highlighting grammar (TextMate or tree-sitter) for editors
-      and GitHub rendering
+- [x] Syntax highlighting grammar (TextMate or tree-sitter) for editors
+      and GitHub rendering - see `editors/vscode/syntaxes/art.tmLanguage.json`
 - [ ] Language server (LSP) - big lift, do this last; unlocks
       autocomplete and go-to-definition
 
