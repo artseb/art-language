@@ -11,7 +11,7 @@ and it's live.
 """
 from ..errors import ParseError
 from ..tokens import TokenType
-from ..ast.base import Param
+from ..features.base import Param
 from .registry import (
     STMT_PARSERS, DECL_PARSERS, PRIMARY_PARSERS, POSTFIX_PARSERS, ASSIGN_BUILDERS,
     primary_parser,
