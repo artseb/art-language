@@ -4,8 +4,7 @@ from ..errors import LangRuntimeError
 
 
 TYPE_NAMES = {
-    int: ("Int",),
-    float: ("Number", "Float"),
+    float: ("Int", "Number", "Float"),
     str: ("String",),
     bool: ("Bool", "Boolean"),
     LangTable: ("Table",),

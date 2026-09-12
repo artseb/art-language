@@ -66,36 +66,22 @@ class TokenType(Enum):
 
     EOF = auto()
 
-KEYWORDS = {
-    "local": TokenType.LOCAL,
-    "static": TokenType.STATIC,
-    "fun": TokenType.FUN,
-    "class": TokenType.CLASS,
-    "extends": TokenType.EXTENDS,
-    "implements": TokenType.IMPLEMENTS,
-    "import": TokenType.IMPORT,
-    "as": TokenType.AS,
-    "return": TokenType.RETURN,
-    "if": TokenType.IF,
-    "else": TokenType.ELSE,
-    "break": TokenType.BREAK,
-    "continue": TokenType.CONTINUE,
-    "while": TokenType.WHILE,
-    "for": TokenType.FOR,
-    "in": TokenType.IN,
-    "and": TokenType.AND,
-    "or": TokenType.OR,
-    "true": TokenType.TRUE,
-    "false": TokenType.FALSE,
-    "nil": TokenType.NIL,
-    "super": TokenType.SUPER,
-    "get": TokenType.GET,
-    "set": TokenType.SET,
-    "operator": TokenType.OPERATOR,
-    "enum": TokenType.ENUM,
-    "switch": TokenType.SWITCH,
-    "case": TokenType.CASE,
-}
+KEYWORDS = {}
+
+
+def register_keyword(word, token_type):
+    """Map a source-level keyword string to its TokenType. Called by each
+    feature module for the keyword(s) it owns (see art/features/*.py) -
+    the enum member itself still has to be declared above, since Python
+    enums can't be assembled piecemeal, but which *word* triggers it is
+    each feature's own business and lives with that feature, not here.
+    """
+    if word in KEYWORDS and KEYWORDS[word] is not token_type:
+        raise RuntimeError(
+            f"Keyword '{word}' is already registered to {KEYWORDS[word]}"
+        )
+    KEYWORDS[word] = token_type
+
 
 
 class Token:

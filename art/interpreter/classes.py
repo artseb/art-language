@@ -1,4 +1,4 @@
-from ..ast import FunDecl, ExpressionStmt, Assign, ClassDecl, Getter, Setter, OperatorDecl
+from ..features import FunDecl, ExpressionStmt, Assign, ClassDecl, Getter, Setter, OperatorDecl
 from ..errors import LangRuntimeError
 from ..runtime import Environment, LangClass, LangInstance, LangTable
 

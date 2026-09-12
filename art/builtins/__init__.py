@@ -1,3 +1,23 @@
+"""
+Registry for ART's native (Python-implemented) global functions.
+
+The point of this package: adding a new builtin should mean "drop a new
+file in here", not "go edit the interpreter's Call-handling code". Each
+module below owns one small area of functionality and registers its
+functions with the `@native(...)` decorator - nothing imports those
+modules directly; `install()` discovers and loads every module in this
+package automatically, so a file that's never explicitly imported still
+takes effect just by existing here.
+
+    # art/builtins/my_area.py
+    from . import native
+
+    @native("greet")
+    def _greet(interp, args):
+        return "hello, " + args[0]
+
+That's the whole integration surface. No other file needs to change.
+"""
 import pkgutil
 import importlib
 
@@ -8,6 +28,13 @@ _loaded = False
 
 
 def native(name, arity=None):
+    """Decorator: register `fn` as the ART builtin `name`.
+
+    `arity`, if given, is the exact number of arguments the builtin
+    accepts; NativeFunction enforces it before `fn` ever runs. Leave it
+    None for a variadic builtin that wants to check argument count (or
+    types) itself.
+    """
     def decorator(fn):
         if name in _REGISTRY:
             raise RuntimeError(

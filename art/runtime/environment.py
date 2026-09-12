@@ -2,6 +2,15 @@ from ..errors import LangRuntimeError
 
 
 class Environment:
+    """A lexical scope. Scopes are chained via `enclosing`, all the way up
+    to the interpreter's global scope, which has `enclosing is None`.
+
+    The lookup chain is walked iteratively rather than by recursive calls,
+    so a very deeply nested scope (e.g. from heavy recursion) fails with
+    ART's own "stack overflow" error instead of a raw Python
+    RecursionError from inside this class itself.
+    """
+
     def __init__(self, enclosing=None):
         self.values = {}
         self.enclosing = enclosing

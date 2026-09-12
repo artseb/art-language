@@ -1,6 +1,15 @@
 from .tokens import Token, TokenType, KEYWORDS
 from .errors import LexError
 
+# Importing this populates tokens.KEYWORDS: every feature module
+# registers the keyword string(s) it owns (see art/features/*.py and
+# tokens.register_keyword). This import has to happen somewhere before
+# tokenizing runs, and the lexer is the first thing that ever needs
+# KEYWORDS, so it happens right here rather than depending on the
+# parser or interpreter having been imported first.
+from . import features as _features  # noqa: F401
+
+
 class Lexer:
     def __init__(self, source: str):
         self.source = source
@@ -16,6 +25,8 @@ class Lexer:
             self._scan_token()
         self.tokens.append(Token(TokenType.EOF, "", None, self.line))
         return self.tokens
+
+    # --- helpers ---
 
     def _at_end(self):
         return self.current >= len(self.source)

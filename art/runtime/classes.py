@@ -80,6 +80,13 @@ class LangInstance:
         self.klass = klass
         self.fields = {}
         self.is_enum_member = False
+        # Only ever populated for an enum's own instances (see
+        # features/enums.py) - declared here too, rather than left to
+        # spring into existence via a later `instance.enum_name = ...`,
+        # so every LangInstance has a consistent shape a type checker
+        # can actually see.
+        self.enum_name = None
+        self.enum_member_name = None
 
     def get(self, name):
         if name in self.fields:

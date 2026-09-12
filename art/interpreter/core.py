@@ -1,3 +1,14 @@
+"""The Interpreter itself: the small, stable engine that ties everything
+together. Per-node-type behavior does NOT live here - see registry.py
+for how art/features/*.py plug their eval/exec handlers in, and
+calling.py / modules.py for the shared engine machinery those handlers
+call into (overload resolution, instantiation, module loading - things
+used by more than one feature, so they don't belong to any single one).
+
+Adding a new statement or expression type never touches this file:
+write a handler function in the right feature file, decorate it with
+@exec_handler(...) / @eval_handler(...), and it's live.
+"""
 import os
 
 from ..errors import LangRuntimeError
@@ -5,15 +16,16 @@ from ..runtime import Environment
 from .. import builtins as builtins_pkg
 from .registry import EXEC_HANDLERS, EVAL_HANDLERS
 from .calling import CallingMixin
-from .classes import ClassMixin
 from .modules import ModuleMixin
-from .switching import SwitchMixin
 
-from . import statements as _statements  # noqa: F401  (registration side effect)
-from . import expressions as _expressions  # noqa: F401  (registration side effect)
+# Importing this runs every feature module once, which is what actually
+# populates EXEC_HANDLERS / EVAL_HANDLERS above (also, redundantly-but-
+# harmlessly, tokens.KEYWORDS and the parser's own registries - see
+# art/features/__init__.py).
+from .. import features as _features  # noqa: F401  (registration side effect)
 
 
-class Interpreter(CallingMixin, ClassMixin, ModuleMixin, SwitchMixin):
+class Interpreter(CallingMixin, ModuleMixin):
     def __init__(self, base_dir=None):
         self.globals = Environment()
         builtins_pkg.install(self.globals)
@@ -39,6 +51,8 @@ class Interpreter(CallingMixin, ClassMixin, ModuleMixin, SwitchMixin):
         if handler is None:
             raise LangRuntimeError(f"No eval handler for {type(node).__name__}")
         return handler(self, node, env)
+
+    # ---------- small value helpers shared across many handlers ----------
 
     def _truthy(self, value):
         if value is None:

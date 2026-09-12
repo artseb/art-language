@@ -15,6 +15,14 @@ class BoundMethod:
         self.func = func
 
 class NativeFunction:
+    """A builtin implemented in Python rather than ART source - `print`,
+    `attempt`, etc. Registered by the modules under `art/builtins/`; see
+    that package for how a new one gets added.
+
+    `fn` is called as `fn(interpreter, args)` and returns the ART-level
+    result directly (already evaluated args in, a plain value out - no
+    AST/Environment involved).
+    """
     def __init__(self, name, fn, arity=None):
         self.name = name
         self.fn = fn

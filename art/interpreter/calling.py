@@ -1,12 +1,28 @@
+"""Everything about invoking something callable: user-defined functions
+(with overload resolution), bound methods, class constructors, and
+native builtins. This is engine machinery shared by many feature files
+(calls.py, classes_.py, enums.py, imports_.py, the `attempt` builtin,
+operator-overload dispatch in operators.py...) so it lives on the
+Interpreter itself rather than as a self-registered handler for one
+specific node type - there's no single node type it belongs to."""
+from typing import TYPE_CHECKING
+
 from ..errors import LangRuntimeError, ReturnSignal
 from ..runtime import (
-    Environment, LangFunction, BoundMethod, LangClass, LangEnum,
-    NativeFunction, runtime_type_matches,
+    Environment, LangFunction, BoundMethod, LangClass, LangInstance, LangEnum,
+    NativeFunction, LangTable, runtime_type_matches,
 )
+
+if TYPE_CHECKING:
+    from .core import Interpreter
 
 
 class CallingMixin:
-    def call_value(self, callee, args):
+    def call_value(self: "Interpreter", callee, args):
+        """Call anything ART considers callable and return its result.
+        The single place that knows how to dispatch on callee type -
+        calls.py's Call handler and the `attempt` builtin both route
+        through this instead of duplicating the isinstance chain."""
         if isinstance(callee, LangFunction):
             return self._call_function(callee, args, this=None)
 
@@ -30,8 +46,34 @@ class CallingMixin:
 
         raise LangRuntimeError(f"'{callee!r}' is not callable")
 
+    def _instantiate(self: "Interpreter", klass: LangClass, args):
+        """Build a new instance of `klass`: run every field initializer
+        (inherited ones included - see LangClass.find_field_inits),
+        then call the constructor (a method named the same as the
+        class) if one exists. Used for plain `SomeClass(...)` calls;
+        enums build their members the same way but call this directly
+        rather than going through call_value (see enums.py)."""
+        instance = LangInstance(klass)
+
+        for name, init_expr in klass.find_field_inits():
+            instance.fields[name] = self._eval(init_expr, klass.closure)
+
+        constructor = klass.methods.get(klass.name)
+        if constructor is not None:
+            self._call_function(constructor, args, this=instance)
+
+        return instance
+
     @staticmethod
     def _register_overload(store, name, params, body, closure, return_type=None, display_name=None):
+        """Add one overload of `name` to `store` (a dict, or anything with
+        `.get`/`__setitem__` like an Environment's `.values`), creating the
+        LangFunction the first time `name` is seen. This is the one place
+        that knows how "a function with this name already exists? then add
+        an overload; otherwise create it" works - shared by plain function
+        declarations (functions.py), class methods/operators (classes_.py),
+        and enum constructors (enums.py).
+        """
         existing = store.get(name)
         if not isinstance(existing, LangFunction):
             existing = LangFunction(display_name or name)
@@ -39,7 +81,7 @@ class CallingMixin:
         existing.add_overload(params, body, closure, return_type)
         return existing
 
-    def _call_function(self, func: LangFunction, args, this):
+    def _call_function(self: "Interpreter", func: LangFunction, args, this):
         params, body, closure, return_type = self._resolve_overload(func, args)
 
         call_env = Environment(closure)
@@ -51,7 +93,6 @@ class CallingMixin:
 
         for param in params:
             if param.variadic:
-                from ..runtime import LangTable
                 values = LangTable()
 
                 while arg_index < len(args):
@@ -89,7 +130,7 @@ class CallingMixin:
 
         return None
 
-    def _resolve_overload(self, func: LangFunction, args):
+    def _resolve_overload(self: "Interpreter", func: LangFunction, args):
         candidates = []
 
         for overload in func.overloads:

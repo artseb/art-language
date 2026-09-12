@@ -1,12 +1,21 @@
+"""Loading and caching `.art` modules for `import "file.art"`. Engine
+machinery (path safety, caching, circular-import detection) shared by
+the Import handler (see features/imports_.py) - kept separate because
+it's reused recursively (importing a module executes its top-level
+statements, which may themselves import other modules)."""
 import os
+from typing import TYPE_CHECKING
 
 from ..errors import ArtError, LangRuntimeError
 from ..runtime import Environment
 from .. import builtins as builtins_pkg
 
+if TYPE_CHECKING:
+    from .core import Interpreter
+
 
 class ModuleMixin:
-    def _module_bind_name(self, rel_path, alias):
+    def _module_bind_name(self: "Interpreter", rel_path, alias):
         if alias:
             return alias
 
@@ -23,7 +32,7 @@ class ModuleMixin:
 
         return stem
 
-    def _load_module(self, rel_path):
+    def _load_module(self: "Interpreter", rel_path):
         if not rel_path.endswith(".art"):
             raise LangRuntimeError(
                 f"Cannot import '{rel_path}': ART modules must be '.art' files"
@@ -34,6 +43,12 @@ class ModuleMixin:
             os.path.join(self.base_dir, rel_path)
         )
 
+        # Path-traversal guard: without this, a script could do
+        # `import "../../../etc/passwd.art"` (or follow a symlink that
+        # points outside the project) and have an arbitrary file on disk
+        # read and fed straight to the lexer/parser. Confine every import
+        # to the project's base directory (the folder the entry script
+        # lives in).
         if os.path.commonpath([base_dir_real, candidate_real]) != base_dir_real:
             raise LangRuntimeError(
                 f"Cannot import '{rel_path}': path escapes the project directory"

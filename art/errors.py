@@ -1,4 +1,8 @@
 class ArtError(Exception):
+    """Base class for all ART errors. Carries an optional source location
+    (line/column) so every stage of the pipeline can report *where*
+    something went wrong, not just what."""
+
     stage = "Error"
 
     def __init__(self, message, line=None, column=None):
@@ -25,6 +29,14 @@ class LexError(ArtError):
 
 
 class ParseError(ArtError):
+    """Raised when tokens cannot be parsed into valid ART syntax.
+
+    Always constructed as ``ParseError(message, token)`` - message first,
+    token second - so line/column are filled in automatically and the
+    argument order can never be accidentally swapped (a real bug in the
+    previous version, which had a second, incompatible ParseError class
+    defined locally in parser.py with the arguments the other way round).
+    """
     stage = "Parse error"
 
     def __init__(self, message, token=None):
@@ -35,6 +47,7 @@ class ParseError(ArtError):
 
 
 class ReturnSignal(Exception):
+    """Used internally to unwind the stack on `return`. Not an error."""
     def __init__(self, value):
         self.value = value
 

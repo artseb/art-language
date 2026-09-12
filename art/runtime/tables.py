@@ -13,7 +13,7 @@ class LangTable:
         self.array.append(value)
 
     def get(self, key):
-        # NOTE: reading from an immutable table is always fine, immutability
+        # NOTE: reading from an immutable table is always fine - immutability
         # only restricts writes (append/set below). A previous version of
         # this method incorrectly blocked reads too, which made it
         # impossible to ever read back an enum's fields or its .members
