@@ -121,7 +121,25 @@
           "type": "number",
           "default": 300,
           "description": "Milliseconds to wait after the last edit before re-checking (only used when art.diagnostics.run is 'onType')."
+        },
+        "art.insertFinalNewlineOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Make every saved ART file end with a single empty line, so the last statement is never on the final line."
         }
+      }
+    },
+    "configurationDefaults": {
+      "[art]": {
+        "editor.autoClosingBrackets": "languageDefined",
+        "editor.autoClosingQuotes": "languageDefined",
+        "editor.autoSurround": "languageDefined",
+        "editor.autoIndent": "full",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": true,
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true
       }
     }
   },

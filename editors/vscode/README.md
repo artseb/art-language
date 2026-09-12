@@ -23,6 +23,11 @@ written in Python.
   file, with type names offered after `:` and `->`.
 - **Snippets** for the common declarations (`fun`, `class`, `classx`,
   `enum`, `for`, `switch`, `get`, `set`, `operator`, `attempt`, ...).
+- **Editing conveniences**: brackets, parentheses and quotes close
+  themselves (and wrap the selection when you type one over it), new lines
+  keep and adjust their indentation inside blocks, block comments continue
+  with `*`, and every save leaves the file ending in one empty line so no
+  statement sits on the last line.
 - **Run the current file** with `ART: Run File` (`Ctrl+F5` / `Cmd+F5`, or
   the play button in the editor title bar). Output goes to a terminal.
 
@@ -46,6 +51,10 @@ diagnostics and `ART: Run File` need the interpreter.
 | `art.diagnostics.enabled` | `true` | Report lex and parse errors. |
 | `art.diagnostics.run` | `onType` | `onType` or `onSave`. |
 | `art.diagnostics.delay` | `300` | Debounce in milliseconds for `onType`. |
+| `art.insertFinalNewlineOnSave` | `true` | End every saved ART file with a single empty line. |
+
+ART files also default to 4-space indentation; override it in your
+settings under `"[art]"` if you prefer something else.
 
 ## Installing from source
 

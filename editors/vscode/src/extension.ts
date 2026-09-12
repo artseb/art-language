@@ -47,6 +47,24 @@ async function runFile(extensionPath: string, terminal: { value?: vscode.Termina
   );
 }
 
+function finalNewlineEdits(document: vscode.TextDocument): vscode.TextEdit[] {
+  if (
+    document.languageId !== 'art' ||
+    !vscode.workspace
+      .getConfiguration('art', document.uri)
+      .get<boolean>('insertFinalNewlineOnSave', true)
+  ) {
+    return [];
+  }
+
+  const last = document.lineAt(document.lineCount - 1);
+  if (last.isEmptyOrWhitespace) {
+    return last.text.length === 0 ? [] : [vscode.TextEdit.delete(last.range)];
+  }
+
+  return [vscode.TextEdit.insert(last.range.end, '\n')];
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   const output = vscode.window.createOutputChannel('ART');
   const runner = new DiagnosticsRunner(context.extensionPath, output);
@@ -69,6 +87,9 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidOpenTextDocument((document) => runner.schedule(document)),
     vscode.workspace.onDidCloseTextDocument((document) => runner.forget(document)),
     vscode.workspace.onDidSaveTextDocument((document) => void runner.check(document)),
+    vscode.workspace.onWillSaveTextDocument((event) => {
+      event.waitUntil(Promise.resolve(finalNewlineEdits(event.document)));
+    }),
     vscode.workspace.onDidChangeTextDocument((event) => {
       const mode = vscode.workspace
         .getConfiguration('art', event.document.uri)
