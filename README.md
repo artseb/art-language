@@ -16,7 +16,6 @@ ART currently supports:
 * Function overloading
 * Classes and objects
 * Inheritance
-* Interfaces
 * Static members
 * Getters and setters
 * Nested classes
@@ -31,7 +30,6 @@ ART currently supports:
 * Mathematical functions
 * Exponentiation
 * A syntax checker for scripts
-* VS Code syntax highlighting and language support
 
 ART is still actively evolving, so some of these systems may change as the language develops.
 
@@ -52,7 +50,7 @@ class Player {
         health = health - amount
     }
 
-    fun alive() {
+    fun isAlive() {
         return health > 0
     }
 }
@@ -61,7 +59,7 @@ local player = Player("Seb")
 
 player.damage(25)
 
-if (player.alive()) {
+if (player.isAlive()) {
     print(player.name + " is still alive")
 }
 ```
@@ -75,15 +73,17 @@ ART uses `local` to explicitly define variables that belong to the current scope
 This provides a simple way to control variable scope without relying on separate public/private declarations.
 
 ```art
-local name = "Seb"
+name = "Seb" // still valid, global
 local health = 100
 ```
 
 Variables can also be declared together:
 
 ```art
-local x = 10, y = 20
+local x, y = 20, 10
 ```
+
+both being `local` ^
 
 `_` can be used when a returned value should be discarded.
 
@@ -110,9 +110,20 @@ Classes can contain fields, functions, static members, getters, setters, and nes
 ```art
 class Enemy {
     local health = 100
+    static maxHealth = 100
 
     fun damage(amount) {
         health = health - amount
+    }
+
+    set health(amount) {
+        if (amount > maxHealth) {
+            health = maxHealth
+        } else if (amount < 0) {
+            health = 0
+        } else {
+            health = amount
+        }
     }
 }
 ```
@@ -126,7 +137,7 @@ Tables are ART's general-purpose collection type.
 They can contain indexed values, key-value pairs, or a mixture of both.
 
 ```art
-local numbers = [10, 20, 30]
+numbers = [10, 20, 30]
 
 local player = {
     name = "Seb",
@@ -216,14 +227,10 @@ The Python implementation therefore serves as the foundation for designing and t
 
 ## Editor Support
 
-ART includes a VS Code extension with support for:
+ART includes a semi-working VS Code extension with support for:
 
-* Syntax highlighting
 * Live syntax diagnostics
 * Outline support
-* Go-to-definition
-* Hover information
-* Completion
 * Snippets
 * Running ART files
 
@@ -285,7 +292,3 @@ ART is primarily an experiment in designing a programming language that is enjoy
 The focus is on keeping the language flexible without making every feature unnecessarily complicated.
 
 It is not intended to copy the design of any single existing language. Its syntax and behavior are being developed independently as the project evolves.
-
-## License
-
-ART is licensed under the **GNU General Public License v3.0**.
