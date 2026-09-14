@@ -58,6 +58,7 @@ class TokenType(Enum):
     LESS_EQUAL = auto()
     GREATER = auto()
     GREATER_EQUAL = auto()
+    CARET = auto()
     ARROW = auto()
     PLUS = auto()
     MINUS = auto()

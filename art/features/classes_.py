@@ -29,7 +29,7 @@ register_keyword("static", TokenType.STATIC)
 _VALID_OPERATORS = {
     TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL,
     TokenType.LESS, TokenType.LESS_EQUAL, TokenType.GREATER, TokenType.GREATER_EQUAL,
-    TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH,
+    TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.CARET,
 }
 
 

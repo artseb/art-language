@@ -125,6 +125,7 @@ class Lexer:
             ";": TokenType.SEMICOLON,
             "+": TokenType.PLUS,
             "*": TokenType.STAR,
+            "^": TokenType.CARET,
         }
         if c in simple:
             self._add_token(simple[c])
@@ -162,6 +163,10 @@ class Lexer:
             return
 
         if c == '"':
+            self._string()
+            return
+
+        if c == "'":
             self._string()
             return
 

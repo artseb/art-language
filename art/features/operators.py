@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 register_keyword("and", TokenType.AND)
 register_keyword("or", TokenType.OR)
 
-_ARITHMETIC_OPS = {"+", "-", "*", "/"}
+_ARITHMETIC_OPS = {"+", "-", "*", "/", "^"}
 _COMPARISON_OPS = {"<", "<=", ">", ">="}
 
 
@@ -101,7 +101,7 @@ def _parse_term(parser: "Parser"):
 
 def _parse_factor(parser: "Parser"):
     expr = _parse_unary(parser)
-    while parser._match(TokenType.STAR, TokenType.SLASH):
+    while parser._match(TokenType.STAR, TokenType.SLASH, TokenType.CARET):
         op = parser._previous()
         right = _parse_unary(parser)
         expr = Binary(expr, op, right)
@@ -188,6 +188,8 @@ def _eval_binary(interp: "Interpreter", node: Binary, env):
         return left > right
     if op == ">=":
         return left >= right
+    if op == "^":
+        return left ** right
 
     raise LangRuntimeError(f"Unknown binary operator '{op}'", op_token)
 

@@ -2,4 +2,7 @@ local v1 = Vector2(10, 10)
 local v2 = v1 * 10
 local v3 = v1 + v2
 local v4 = v1 * v2
-print(v1, v2, v3, v4)
+// local v5 = Vector3.one()
+local thing = "hello".upper()
+local thing2 = 10^3
+print(v1, v2, v3, v4, thing, thing2)
