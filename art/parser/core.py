@@ -9,9 +9,9 @@ Adding a new statement/declaration/primary-expression/postfix form
 never touches this file: register a handler in the right feature file
 and it's live.
 """
+from ..features.base import Param
 from ..errors import ParseError
 from ..tokens import TokenType
-from ..features.base import Param
 from .registry import (
     STMT_PARSERS, DECL_PARSERS, PRIMARY_PARSERS, POSTFIX_PARSERS, ASSIGN_BUILDERS,
     primary_parser,
@@ -155,6 +155,8 @@ class Parser:
 
                 if not self._match(TokenType.COMMA):
                     break
+                if self._check(TokenType.RPAREN):
+                    break  # trailing comma
 
         self._consume(TokenType.RPAREN, f"Expected ')' after {context} parameters")
         return params

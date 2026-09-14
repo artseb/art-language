@@ -150,12 +150,12 @@ def _eval_binary(interp: "Interpreter", node: Binary, env):
     right = interp._eval(node.right, env)
 
     if isinstance(left, LangInstance):
-        operator = left.klass.operators.get(op)
+        operator = left.klass.find_operator(op)
         if operator is not None:
             return interp._call_function(operator, [right], this=left)
 
     if op == "!=" and isinstance(left, LangInstance):
-        operator = left.klass.operators.get("==")
+        operator = left.klass.find_operator("==")
         if operator is not None:
             result = interp._call_function(operator, [right], this=left)
             return not interp._truthy(result)

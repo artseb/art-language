@@ -1,0 +1,40 @@
+local string = [
+    "upper" = fun(s) {
+        return __native_string_upper(s)
+    },
+
+    "lower" = fun(s) {
+        return __native_string_lower(s)
+    },
+
+    "trim" = fun(s) {
+        return __native_string_trim(s)
+    },
+
+    "contains" = fun(s, needle) {
+        return __native_string_contains(s, needle)
+    },
+
+    "replace" = fun(s, old, new) {
+        return __native_string_replace(s, old, new)
+    },
+
+    "split" = fun(s, sep = nil) {
+        if (sep == nil) {
+            return __native_string_split(s)
+        }
+        return __native_string_split(s, sep)
+    },
+
+    "join" = fun(pieces, sep) {
+        return __native_string_join(pieces, sep)
+    },
+
+    "substring" = fun(s, start, stop) {
+        return __native_string_substring(s, start, stop)
+    },
+
+    "length" = fun(s) {
+        return len(s)
+    }
+]

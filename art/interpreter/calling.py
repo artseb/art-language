@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from ..errors import LangRuntimeError, ReturnSignal
 from ..runtime import (
     Environment, LangFunction, BoundMethod, LangClass, LangInstance, LangEnum,
-    NativeFunction, LangTable, runtime_type_matches,
+    NativeFunction, LangTable, PrimitiveBoundMethod, runtime_type_matches,
 )
 
 if TYPE_CHECKING:
@@ -28,6 +28,9 @@ class CallingMixin:
 
         if isinstance(callee, BoundMethod):
             return self._call_function(callee.func, args, this=callee.instance)
+
+        if isinstance(callee, PrimitiveBoundMethod):
+            return self.call_value(callee.func, [callee.receiver, *args])
 
         if isinstance(callee, NativeFunction):
             return callee.call(self, args)

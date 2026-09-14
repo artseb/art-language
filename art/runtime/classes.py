@@ -61,6 +61,19 @@ class LangClass:
             return self.superclass.find_static_owner(name)
         return None
 
+    def find_operator(self, op):
+        """Return the operator-overload function for `op` (self or an
+        ancestor's), or None. Without this, a subclass that doesn't
+        redeclare `operator +` etc. itself would silently lose it -
+        every other member kind (methods, getters, setters, statics)
+        already walks the superclass chain; this just brings operators
+        in line with that."""
+        if op in self.operators:
+            return self.operators[op]
+        if self.superclass is not None:
+            return self.superclass.find_operator(op)
+        return None
+
     def get_static(self, name):
         owner = self.find_static_owner(name)
         if owner is None:

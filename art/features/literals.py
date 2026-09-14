@@ -84,6 +84,8 @@ def _parse_table_literal(parser: "Parser"):
     if not parser._check(TokenType.RBRACKET):
         entries.append(table_entry())
         while parser._match(TokenType.COMMA):
+            if parser._check(TokenType.RBRACKET):
+                break  # trailing comma - `[1, 2, 3,]` is fine, not an error
             entries.append(table_entry())
 
     parser._consume(TokenType.RBRACKET, "Expected ']' after table literal")

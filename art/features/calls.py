@@ -50,6 +50,8 @@ def _parse_call(parser: "Parser", left):
     if not parser._check(TokenType.RPAREN):
         args.append(parser._expression())
         while parser._match(TokenType.COMMA):
+            if parser._check(TokenType.RPAREN):
+                break  # trailing comma
             args.append(parser._expression())
     parser._consume(TokenType.RPAREN, "Expected ')' after arguments")
     return Call(left, args)

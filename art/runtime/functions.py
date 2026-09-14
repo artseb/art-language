@@ -14,6 +14,30 @@ class BoundMethod:
         self.instance = instance
         self.func = func
 
+
+class PrimitiveBoundMethod:
+    """The `"hi".upper()` sugar: for a raw value that isn't a
+    LangInstance (a string, a number - see features/access.py's Get
+    handler for exactly which), `.name` is resolved by looking `name`
+    up in that type's namespace table (`string`, `math` - ordinary ART
+    tables, see std/string.art and std/math.art) rather than on the
+    value itself. Calling it then passes the original value as the
+    function's first argument.
+
+    Unlike BoundMethod, there's no `this` binding involved - the
+    functions living in those namespace tables are just plain ART
+    functions that take the receiver as an explicit first parameter
+    (`fun(s) { ... }`), the same as if you'd written `string.upper(s)`
+    yourself. This is purely a call-site convenience, not a different
+    calling convention.
+    """
+    def __init__(self, receiver, func):
+        self.receiver = receiver
+        self.func = func
+
+    def __repr__(self):
+        return f"<bound {self.func!r} to {self.receiver!r}>"
+
 class NativeFunction:
     """A builtin implemented in Python rather than ART source - `print`,
     `attempt`, etc. Registered by the modules under `art/builtins/`; see

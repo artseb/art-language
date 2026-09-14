@@ -18,12 +18,16 @@ class Lexer:
         self.current = 0
         self.line = 1
         self.column = 1
+        self.start_line = 1
+        self.start_column = 1
 
     def tokenize(self):
         while not self._at_end():
             self.start = self.current
+            self.start_line = self.line
+            self.start_column = self.column
             self._scan_token()
-        self.tokens.append(Token(TokenType.EOF, "", None, self.line))
+        self.tokens.append(Token(TokenType.EOF, "", None, self.line, self.column))
         return self.tokens
 
     # --- helpers ---
@@ -56,19 +60,17 @@ class Lexer:
     def _match(self, expected):
         if self._at_end() or self.source[self.current] != expected:
             return False
-        self.current += 1
+        self._advance()
         return True
 
     def _add_token(self, type_, literal=None):
-        start_line = self.line
-        start_column = self.column
         text = self.source[self.start:self.current]
         self.tokens.append(Token(
-            type_, 
-            text, 
-            literal, 
-            start_line,
-            start_column
+            type_,
+            text,
+            literal,
+            self.start_line,
+            self.start_column,
         ))
 
     # --- core scanning ---
@@ -79,7 +81,8 @@ class Lexer:
         if c in " \r\t":
             return
         if c == "\n":
-            self.line += 1
+            # _advance() already moved the line/column counters past the
+            # newline; nothing else to do.
             return
 
         # line comments
@@ -170,7 +173,7 @@ class Lexer:
             self._identifier()
             return
 
-        raise LexError(f"Unexpected character {c!r}", self.line, self.column)
+        raise LexError(f"Unexpected character {c!r}", self.start_line, self.start_column)
 
     _ESCAPES = {
         "n": "\n",
@@ -208,7 +211,7 @@ class Lexer:
                     raise LexError(
                         f"Unknown escape sequence '\\{esc}' in string",
                         self.line,
-                        self.column,
+                        self.column - 2,
                     )
                 continue
 

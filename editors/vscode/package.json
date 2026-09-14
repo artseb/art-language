@@ -1,0 +1,140 @@
+{
+  "name": "art-language",
+  "displayName": "ART Language",
+  "description": "Syntax highlighting, diagnostics, outline, completion and run commands for the ART scripting language.",
+  "version": "0.1.0",
+  "publisher": "artseb",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Linters"
+  ],
+  "keywords": [
+    "art",
+    "art-language",
+    "scripting"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artseb/art-language.git"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:art"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "art",
+        "aliases": [
+          "ART",
+          "art"
+        ],
+        "extensions": [
+          ".art"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "art",
+        "scopeName": "source.art",
+        "path": "./syntaxes/art.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "art",
+        "path": "./snippets/art.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "art.runFile",
+        "title": "ART: Run File",
+        "icon": "$(play)"
+      },
+      {
+        "command": "art.checkFile",
+        "title": "ART: Check Syntax of Current File"
+      }
+    ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "art.runFile",
+          "when": "resourceLangId == art",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "art.runFile",
+          "when": "resourceLangId == art"
+        },
+        {
+          "command": "art.checkFile",
+          "when": "resourceLangId == art"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "art.runFile",
+        "key": "ctrl+f5",
+        "mac": "cmd+f5",
+        "when": "resourceLangId == art"
+      }
+    ],
+    "configuration": {
+      "title": "ART",
+      "properties": {
+        "art.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Python interpreter used to run the ART interpreter and the syntax checker."
+        },
+        "art.interpreterPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the ART interpreter's run.py. When empty, the extension looks for run.py in the open workspace folders."
+        },
+        "art.diagnostics.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Report lex and parse errors as you type."
+        },
+        "art.diagnostics.run": {
+          "type": "string",
+          "enum": [
+            "onType",
+            "onSave"
+          ],
+          "default": "onType",
+          "description": "When to re-check the document for syntax errors."
+        },
+        "art.diagnostics.delay": {
+          "type": "number",
+          "default": 300,
+          "description": "Milliseconds to wait after the last edit before re-checking (only used when art.diagnostics.run is 'onType')."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "sync-checker": "node scripts/sync-checker.js",
+    "vscode:prepublish": "npm run sync-checker && npm run compile",
+    "package": "npm run sync-checker && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -33,14 +33,14 @@ more on top.
 Right now the entire stdlib is `print` and `attempt`. Roughly in order of
 how often each gets reached for:
 
-- [ ] **Strings**: length, split, trim, substring/slice, replace,
+- [x] **Strings**: length, split, trim, substring/slice, replace,
       indexOf, upper/lower
 - [ ] **String interpolation** (`"Hello, ${name}"`) instead of `+`-chaining
 - [ ] **Collections**: push/pop/insert/remove, length, sort, contains
 - [ ] **Functional collection ops**: map/filter/reduce (closures already
       exist - this is where they start paying off)
-- [ ] **Math**: abs, floor/ceil/round, sqrt, pow, min/max, random
-- [ ] **I/O**: stdin, file read/write - design the sandboxing/permission
+- [x] **Math**: abs, floor/ceil/round, sqrt, pow, min/max, random
+- [x] **I/O**: stdin, file read/write - design the sandboxing/permission
       model deliberately here, using the same threat model as the import
       path-traversal fix, not bolted on after the fact
 
@@ -65,8 +65,8 @@ The stuff that makes it feel like *a language*, not *a script you run*.
 - [ ] REPL
 - [ ] Formatter
 - [ ] Test runner / assertion library
-- [ ] Syntax highlighting grammar (TextMate or tree-sitter) for editors
-      and GitHub rendering
+- [x] Syntax highlighting grammar (TextMate or tree-sitter) for editors
+      and GitHub rendering - see `editors/vscode/syntaxes/art.tmLanguage.json`
 - [ ] Language server (LSP) - big lift, do this last; unlocks
       autocomplete and go-to-definition
 

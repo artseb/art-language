@@ -78,6 +78,7 @@ class ModuleMixin:
             ast = Parser(tokens).parse()
             module_env = Environment()  # isolated global scope for the module
             builtins_pkg.install(module_env)  # print/attempt/etc. need to be visible here too
+            self._install_stdlib(module_env)  # so does Vector/etc. - same as any other scope
             for stmt in ast:
                 self._exec(stmt, module_env)
         except ArtError as e:

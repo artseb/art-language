@@ -17,6 +17,7 @@ from .. import builtins as builtins_pkg
 from .registry import EXEC_HANDLERS, EVAL_HANDLERS
 from .calling import CallingMixin
 from .modules import ModuleMixin
+from .stdlib import StdlibMixin
 
 # Importing this runs every feature module once, which is what actually
 # populates EXEC_HANDLERS / EVAL_HANDLERS above (also, redundantly-but-
@@ -25,10 +26,11 @@ from .modules import ModuleMixin
 from .. import features as _features  # noqa: F401  (registration side effect)
 
 
-class Interpreter(CallingMixin, ModuleMixin):
+class Interpreter(CallingMixin, ModuleMixin, StdlibMixin):
     def __init__(self, base_dir=None):
         self.globals = Environment()
         builtins_pkg.install(self.globals)
+        self._install_stdlib(self.globals)  # after builtins: stdlib source can call print/sqrt/etc.
 
         self.base_dir = base_dir or os.getcwd()
         self.module_cache = {}   # abs_path -> Environment (of that module's globals)
