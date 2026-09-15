@@ -42,7 +42,7 @@ class Player {
     local name
     local health = 100
 
-    fun init(name) {
+    fun Player(name) {
         this.name = name
     }
 
