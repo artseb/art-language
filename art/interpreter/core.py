@@ -63,6 +63,27 @@ class Interpreter(CallingMixin, ModuleMixin, StdlibMixin):
             return value
         return True
 
+    def display(self, value):
+        """How a value looks when a program shows it to a human -
+        `print` and string interpolation both go through here. Like
+        stringify(), but gives a class a chance to speak for itself
+        first: if `value` is an instance whose class (or a superclass)
+        defines `toString()`, that's called with no arguments and its
+        result used instead of the default representation."""
+        from ..runtime import LangInstance, stringify
+ 
+        if isinstance(value, LangInstance):
+            method = value.klass.find_method("toString")
+            if method is not None:
+                result = self._call_function(method, [], this=value)
+                if not isinstance(result, str):
+                    raise LangRuntimeError(
+                        f"toString() must return a string, got {type(result).__name__}"
+                    )
+                return result
+ 
+        return stringify(value)
+
     @staticmethod
     def _values_equal(left, right):
         # Guards against e.g. `table == table` or `instance == 5` falling
@@ -80,7 +101,7 @@ class Interpreter(CallingMixin, ModuleMixin, StdlibMixin):
             return "nil"
         if isinstance(value, bool):
             return "Bool"
-        if isinstance(value, float):
+        if isinstance(value, (int, float)):
             return "Number"
         if isinstance(value, str):
             return "String"

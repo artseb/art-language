@@ -187,11 +187,26 @@ class Lexer:
         '"': '"',
         "\\": "\\",
         "0": "\0",
+        "$": "$",
     }
 
     def _string(self):
+        """Scan a string literal, which is an interpolated string as soon
+        as it contains a `${ ... }` hole. Interpolation is resolved in
+        two stages: here the hole's source text is only *found* (matching
+        braces, skipping over nested string literals) and stashed
+        verbatim, along with where it started; the parser is what turns
+        that text into an expression (see features/literals.py). The
+        lexer deliberately doesn't recurse into the parser itself - it
+        has no business knowing the expression grammar."""
         start_line = self.line
         chars = []
+        parts = []  # ("text", str) | ("expr", source, line, column)
+
+        def flush_text():
+            if chars:
+                parts.append(("text", "".join(chars)))
+                chars.clear()
 
         while self._peek() != '"' and not self._at_end():
             ch = self._peek()
@@ -220,13 +235,65 @@ class Lexer:
                     )
                 continue
 
+            if ch == "$" and self._peek_next() == "{":
+                flush_text()
+                parts.append(self._interpolation())
+                continue
+
             chars.append(self._advance())
 
         if self._at_end():
             raise LexError("Unterminated string", start_line)
 
         self._advance()  # closing "
-        self._add_token(TokenType.STRING, "".join(chars))
+
+        if not any(part[0] == "expr" for part in parts):
+            self._add_token(TokenType.STRING, "".join(chars))
+            return
+ 
+        flush_text()
+        self._add_token(TokenType.INTERP_STRING, parts)
+ 
+    def _interpolation(self):
+        """Consume one `${ ... }` hole and return its raw source."""
+        self._advance()  # '$'
+        self._advance()  # '{'
+ 
+        expr_line, expr_column = self.line, self.column
+        start = self.current
+        depth = 1
+ 
+        while depth > 0:
+            if self._at_end():
+                raise LexError("Unterminated interpolation (missing '}')", expr_line, expr_column)
+ 
+            ch = self._peek()
+ 
+            if ch in "\"'":
+                # A nested string can contain braces of its own, so skip
+                # it wholesale rather than counting through it.
+                quote = self._advance()
+                while not self._at_end() and self._peek() != quote:
+                    if self._peek() == "\\":
+                        self._advance()
+                    self._advance()
+                if self._at_end():
+                    raise LexError("Unterminated string inside interpolation", expr_line)
+                self._advance()  # closing quote
+                continue
+ 
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    source = self.source[start:self.current]
+                    self._advance()  # '}'
+                    if not source.strip():
+                        raise LexError("Empty interpolation '${}'", expr_line, expr_column)
+                    return ("expr", source, expr_line, expr_column)
+ 
+            self._advance()
 
     def _number(self):
         while self._peek().isdigit():

@@ -1,0 +1,79 @@
+local table = [
+    "push" = fun(t, ...values) {
+        for (local index, value in values) {
+            __native_table_push(t, value)
+        }
+        return t
+    },
+ 
+    "pop" = fun(t) {
+        return __native_table_pop(t)
+    },
+ 
+    "insert" = fun(t, index, value) {
+        return __native_table_insert(t, index, value)
+    },
+ 
+    "remove" = fun(t, index) {
+        return __native_table_remove(t, index)
+    },
+ 
+    "clear" = fun(t) {
+        return __native_table_clear(t)
+    },
+ 
+    "contains" = fun(t, value) {
+        return __native_table_contains(t, value)
+    },
+ 
+    "indexOf" = fun(t, value) {
+        return __native_table_index_of(t, value)
+    },
+ 
+    "slice" = fun(t, start, stop) {
+        return __native_table_slice(t, start, stop)
+    },
+ 
+    "reverse" = fun(t) {
+        return __native_table_reverse(t)
+    },
+ 
+    "keys" = fun(t) {
+        return __native_table_keys(t)
+    },
+ 
+    "values" = fun(t) {
+        return __native_table_values(t)
+    },
+ 
+    "sort" = fun(t, less = nil) {
+        if (less == nil) {
+            return __native_table_sort(t)
+        }
+        return __native_table_sort(t, less)
+    },
+ 
+    "map" = fun(t, transform) {
+        return __native_table_map(t, transform)
+    },
+ 
+    "filter" = fun(t, predicate) {
+        return __native_table_filter(t, predicate)
+    },
+ 
+    "reduce" = fun(t, combine, initial) {
+        return __native_table_reduce(t, combine, initial)
+    },
+ 
+    "find" = fun(t, predicate) {
+        return __native_table_find(t, predicate)
+    },
+ 
+    "join" = fun(t, sep) {
+        return __native_string_join(t, sep)
+    },
+ 
+    "length" = fun(t) {
+        return len(t)
+    }
+]

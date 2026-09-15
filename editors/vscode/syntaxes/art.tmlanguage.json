@@ -58,13 +58,26 @@
       "patterns": [
         {
           "name": "constant.character.escape.art",
-          "match": "\\\\[ntr\"\\\\0]"
+          "match": "\\\\[ntr\"\\\\$0]"
         },
         {
           "name": "invalid.illegal.unknown-escape.art",
           "match": "\\\\."
-        }
+        },
+        { "include": "#interpolation" }
       ]
+    },
+    "interpolation": {
+      "name": "meta.embedded.expression.art",
+      "begin": "\\$\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.template-expression.begin.art" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.template-expression.end.art" }
+      },
+      "patterns": [{ "include": "$self" }]
     },
     "number": {
       "name": "constant.numeric.art",

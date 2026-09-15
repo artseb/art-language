@@ -95,9 +95,18 @@ def _parse_class_decl(parser: "Parser", is_local, in_class):
 def _parse_static_decl(parser: "Parser", is_local, in_class):
     static_token = parser._consume(TokenType.STATIC, "Expected 'static'")
     if not in_class:
-        raise parser._error("'static' fields are only allowed inside a class body.", static_token)
+        raise parser._error(
+            "'static' members are only allowed inside a class body.", static_token
+        )
 
-    name = parser._consume(TokenType.IDENTIFIER, "Expected static field name.").lexeme
+    if parser._check(TokenType.FUN):
+        from .functions import _parse_fun_decl
+        return _parse_fun_decl(parser, is_local=False, in_class=in_class, is_static=True)
+ 
+    name = parser._consume(
+        TokenType.IDENTIFIER,
+        "Expected a static field name or 'fun' after 'static'.",
+    ).lexeme
     parser._consume(TokenType.EQUAL, f"Static field '{name}' must be initialized, e.g. 'static {name} = 0'.")
     value = parser._expression()
 
@@ -172,6 +181,18 @@ def _build_class(interp: "Interpreter", node: ClassDecl, env):
 
     for member in node.body:
         if isinstance(member, FunDecl):
+            if member.is_static:
+                function = interp._register_overload(
+                    klass.static_methods, member.name, member.params, member.body,
+                    class_env, member.return_type,
+                    display_name=f"{klass.name}.{member.name}",
+                )
+                # Also visible by bare name inside the class body, the
+                # same as a nested class - a sibling method calling
+                # `helper()` shouldn't have to spell out the class name.
+                class_env.define(member.name, function)
+                continue
+ 
             interp._register_overload(
                 klass.methods, member.name, member.params, member.body,
                 class_env, member.return_type,
@@ -201,8 +222,52 @@ def _build_class(interp: "Interpreter", node: ClassDecl, env):
         else:
             raise LangRuntimeError(f"Unsupported class member: {type(member).__name__}")
 
+    _check_interfaces(klass, env)
+
     return klass
 
+
+def _check_interfaces(klass, env):
+    """Make `implements` mean something: every method an interface
+    declares has to actually exist on the implementing class.
+ 
+    An interface is just a class used as one - ART has no separate
+    `interface` keyword - so "the methods it declares" means its own
+    methods and its ancestors', minus its constructor (which is named
+    after the interface itself and is about building *that* class, not
+    a contract the implementor has to satisfy).
+    """
+    for interface_name in klass.interfaces:
+        if not env.has(interface_name):
+            raise LangRuntimeError(
+                f"Class '{klass.name}' implements unknown interface '{interface_name}'"
+            )
+ 
+        interface = env.get(interface_name)
+        if not isinstance(interface, LangClass):
+            raise LangRuntimeError(
+                f"'{interface_name}' is not a class, so '{klass.name}' cannot implement it"
+            )
+ 
+        required = []
+        current = interface
+        while current is not None:
+            for method_name in current.methods:
+                if method_name != current.name and method_name not in required:
+                    required.append(method_name)
+            current = current.superclass
+ 
+        missing = [
+            name for name in required
+            if klass.find_method(name) is None and klass.find_static_method(name) is None
+        ]
+ 
+        if missing:
+            raise LangRuntimeError(
+                f"Class '{klass.name}' does not implement "
+                f"'{interface_name}': missing {', '.join(sorted(missing))}"
+            )
+ 
 
 @exec_handler(ClassDecl)
 def _exec_class_decl(interp: "Interpreter", node: ClassDecl, env):

@@ -17,14 +17,16 @@ if TYPE_CHECKING:
 
 register_keyword("super", TokenType.SUPER)
 
-# `"hi".upper()` / `16.sqrt()` sugar (see PrimitiveBoundMethod): which
-# global namespace table a raw value's `.name` gets looked up in.
-# Deliberately narrow - only the primitive types that actually have a
-# namespace-table library (std/string.art, std/math.art) get this
-# treatment; everything else falls through to the ordinary property-
-# access error below, same as ever.
+# `"hi".upper()` / `16.sqrt()` / `numbers.push(4)` sugar (see
+# PrimitiveBoundMethod): which global namespace table a value's `.name`
+# is looked up in when the value has no such property of its own.
+# Deliberately narrow - only the types that actually have a
+# namespace-table library (std/string.art, std/math.art, std/table.art)
+# get this treatment; everything else falls through to the ordinary
+# property-access error below, same as ever.
 _PRIMITIVE_NAMESPACES = (
     (str, "string"),
+    (LangTable, "table"),
     ((int, float), "math"),
 )
 
@@ -36,6 +38,37 @@ def _primitive_namespace_for(value):
         if isinstance(value, types):
             return namespace_name
     return None
+
+
+def _namespace_method(interp: "Interpreter", env, value, name):
+    """Resolve `value.name` as a library method from `value`'s namespace
+    table, or return None if this kind of value has no namespace."""
+    namespace_name = _primitive_namespace_for(value)
+    if namespace_name is None:
+        return None
+
+    if not env.has(namespace_name):
+        raise LangRuntimeError(
+            f"'{namespace_name}' isn't loaded, so {interp._type_name(value)} "
+            f"values have no methods available"
+        )
+
+    namespace = env.get(namespace_name)
+    if not isinstance(namespace, LangTable):
+        raise LangRuntimeError(f"'{namespace_name}' isn't a namespace table")
+
+    if name not in namespace.map:
+        if isinstance(value, LangTable):
+            raise LangRuntimeError(
+                f"Table has no entry '{name}', and the 'table' library "
+                f"has no method by that name either"
+            )
+        raise LangRuntimeError(
+            f"{interp._type_name(value)} values have no method '{name}' "
+            f"(nothing named '{name}' in the '{namespace_name}' library)"
+        )
+
+    return PrimitiveBoundMethod(value, namespace.map[name])
 
 
 class Get(Node):
@@ -154,7 +187,12 @@ def _eval_get(interp: "Interpreter", node: Get, env):
         return obj.get(node.name)
 
     if isinstance(obj, LangTable):
-        return obj.get(node.name)
+        # An entry the table actually holds always wins over a library
+        # method, so a table storing its own "sort" key still reads back
+        # what it stores.
+        if node.name in obj.map:
+            return obj.map[node.name]
+        return _namespace_method(interp, env, obj, node.name)
 
     if isinstance(obj, LangModule):
         return obj.get(node.name)
@@ -167,27 +205,20 @@ def _eval_get(interp: "Interpreter", node: Get, env):
     if isinstance(obj, LangClass):
         if obj.find_static_owner(node.name) is not None:
             return obj.get_static(node.name)
+        static_method = obj.find_static_method(node.name)
+        if static_method is not None:
+            return static_method
         if node.name in obj.nested_classes:
             return obj.nested_classes[node.name]
         raise LangRuntimeError(
-            f"Class '{obj.name}' has no static field or nested class '{node.name}'"
+            f"Class '{obj.name}' has no static field, static method or "
+            f"nested class '{node.name}'"
         )
 
-    namespace_name = _primitive_namespace_for(obj)
-    if namespace_name is not None:
-        if not env.has(namespace_name):
-            raise LangRuntimeError(
-                f"'{namespace_name}' isn't loaded, so {interp._type_name(obj)} "
-                f"values have no methods available"
-            )
-
-        namespace = env.get(namespace_name)
-        if not isinstance(namespace, LangTable):
-            raise LangRuntimeError(f"'{namespace_name}' isn't a namespace table")
-
-        func = namespace.get(node.name)  # raises a clear error itself if missing
-        return PrimitiveBoundMethod(obj, func)
-
+    method = _namespace_method(interp, env, obj, node.name)
+    if method is not None:
+        return method
+    
     raise LangRuntimeError(f"Cannot access property '{node.name}' on {obj!r}")
 
 

@@ -4,6 +4,10 @@ class TokenType(Enum):
     # Literals
     NUMBER = auto()
     STRING = auto()
+    # A string literal containing at least one `${ ... }` hole. Its
+    # `literal` is the list of parts the lexer found, not a finished
+    # string - see Lexer._string and features/literals.py.
+    INTERP_STRING = auto()
     IDENTIFIER = auto()
 
     # Keywords

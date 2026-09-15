@@ -86,4 +86,10 @@ class LangTable:
     def _render_value(value, seen):
         if isinstance(value, LangTable):
             return value._render(seen)
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if value is None:
+            return "nil"
+        if isinstance(value, float) and value.is_integer():
+            return str(int(value))
         return repr(value)

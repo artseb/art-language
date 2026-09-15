@@ -18,28 +18,31 @@ register_keyword("fun", TokenType.FUN)
 
 
 class FunDecl(Node):
-    def __init__(self, name, params, body, is_local=False, return_type=None):
+    def __init__(self, name, params, body, is_local=False, return_type=None, is_static=False):
         self.name = name
         self.params = params
         self.body = body
         self.is_local = is_local
         self.return_type = return_type
+        # `static fun` inside a class body - see features/classes_.py,
+        # the only place this means anything.
+        self.is_static = is_static
 
     def __repr__(self):
-        return f"FunDecl({self.name}, {self.params!r}, local={self.is_local})"
+        return f"FunDecl({self.name}, {self.params!r}, local={self.is_local}, static={self.is_static})"
 
 
 # ---------- parsing ----------
 
 @decl_parser(TokenType.FUN)
-def _parse_fun_decl(parser: "Parser", is_local, in_class):
+def _parse_fun_decl(parser: "Parser", is_local, in_class, is_static=False):
     parser._consume(TokenType.FUN, "Expected 'fun'")
     name = parser._consume(TokenType.IDENTIFIER, "Expected function name").lexeme
 
     params = parser._parse_param_list("function")
     return_type = parser._parse_optional_return_type()
     body = parser._block()
-    return FunDecl(name, params, body, is_local, return_type)
+    return FunDecl(name, params, body, is_local, return_type, is_static)
 
 
 # ---------- interpreting ----------

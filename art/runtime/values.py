@@ -5,6 +5,10 @@ from ..errors import LangRuntimeError
 
 TYPE_NAMES = {
     float: ("Int", "Number", "Float"),
+    # Numbers are floats everywhere in ART, but a plain Python int still
+    # reaches user code in a few places (a `for ... in` loop's index,
+    # for one), and those are numbers as far as a script can tell.
+    int: ("Int", "Number", "Float"),
     str: ("String",),
     bool: ("Bool", "Boolean"),
     LangTable: ("Table",),
@@ -14,6 +18,11 @@ TYPE_NAMES = {
 def runtime_type_matches(value, type_name):
     if type_name is None:
         return True
+
+    if isinstance(value, bool):
+        # bool is an int subclass in Python; without this, `true` would
+        # satisfy a parameter typed `Int`.
+        return type_name in TYPE_NAMES[bool]
 
     for py_type, names in TYPE_NAMES.items():
         if isinstance(value, py_type) and type_name in names:

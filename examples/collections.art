@@ -1,0 +1,57 @@
+class Describable {
+    fun describe() {}
+}
+ 
+class Item implements Describable {
+    static made = 0
+ 
+    local name
+    local price
+ 
+    fun Item(name, price) {
+        this.name = name
+        this.price = price
+        Item.made = Item.made + 1
+    }
+ 
+    static fun free(name) {
+        return Item(name, 0)
+    }
+ 
+    fun describe() {
+        return "${name} (${price}g)"
+    }
+ 
+    fun toString() {
+        return describe()
+    }
+}
+ 
+local shop = [Item("Sword", 120), Item("Rope", 15), Item.free("Pebble")]
+ 
+shop.push(Item("Shield", 80))
+shop.sort(fun(a, b) { return a.price < b.price })
+ 
+print("stock: ${shop.length()} of ${Item.made} items ever made")
+ 
+for (local index, item in shop) {
+    print("  ${index}. ${item.describe()}")
+}
+ 
+local names = shop.map(fun(item) { return item.name })
+local pricey = shop.filter(fun(item) { return item.price > 50 })
+local total = shop.reduce(fun(sum, item) { return sum + item.price }, 0)
+local rope = shop.find(fun(item) { return item.name == "Rope" })
+ 
+print("names: ${names.join(", ")}")
+print("pricey: ${pricey.length()}, total: ${total}g, rope costs ${rope.price}g")
+print("cheapest two: ${shop.slice(1, 2).map(fun(item) { return item.name })}")
+ 
+local stats = ["hp" = 30, "mp" = 12]
+print("stats ${stats.keys()} = ${stats.values()}")
+ 
+local queue = [1, 2, 3]
+queue.insert(1, 0)
+queue.remove(4)
+queue.reverse()
+print("queue ${queue}, has 2: ${queue.contains(2)}, at ${queue.indexOf(2)}")

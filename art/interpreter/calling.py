@@ -17,6 +17,31 @@ if TYPE_CHECKING:
     from .core import Interpreter
 
 
+def _describe_overloads(func: LangFunction):
+    """Render every declared signature of `func` the way it was
+    written - `name(a: Int, b = ..., ...rest)` - so a failed call can
+    show what *does* exist instead of only what didn't work."""
+    signatures = []
+ 
+    for params, _body, _closure, return_type in func.overloads:
+        rendered = []
+ 
+        for param in params:
+            text = f"...{param.name}" if param.variadic else param.name
+            if param.type_name is not None:
+                text += f": {param.type_name}"
+            if param.default is not None:
+                text += " = ..."
+            rendered.append(text)
+ 
+        signature = f"{func.name}({', '.join(rendered)})"
+        if return_type is not None:
+            signature += f" -> {return_type}"
+        signatures.append(signature)
+ 
+    return "; ".join(signatures)
+
+
 class CallingMixin:
     def call_value(self: "Interpreter", callee, args):
         """Call anything ART considers callable and return its result.
@@ -155,7 +180,8 @@ class CallingMixin:
 
         if not candidates:
             raise LangRuntimeError(
-                f"No overload of '{func.name}' takes {len(args)} argument(s)"
+                f"No overload of '{func.name}' takes {len(args)} argument(s). "
+                f"Available: {_describe_overloads(func)}"
             )
 
         matching = [
@@ -173,4 +199,20 @@ class CallingMixin:
                 return sum(1 for p in params if p.type_name is not None)
             return max(matching, key=specificity)
 
-        return candidates[0]
+        # Nothing matched on types. Overloads whose parameters are all
+        # untyped can still take anything, so falling back to one of
+        # those keeps untyped code working; if every candidate is typed,
+        # the call really is wrong and saying so beats running the wrong
+        # body.
+        untyped = [
+            overload for overload in candidates
+            if all(param.type_name is None for param in overload[0])
+        ]
+        if untyped:
+            return untyped[0]
+ 
+        given = ", ".join(self._type_name(arg) for arg in args) or "no arguments"
+        raise LangRuntimeError(
+            f"No overload of '{func.name}' accepts ({given}). "
+            f"Available: {_describe_overloads(func)}"
+        )

@@ -31,6 +31,10 @@ fun greet(name: String, age: Int) {
 greet("artseb")
 greet("artseb", 5)
 
+class Speaker {
+    fun speak() {}
+}
+
 class Animal {
     local name = "Animal"
 

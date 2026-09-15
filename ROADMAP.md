@@ -12,17 +12,19 @@ being solid.
 Fix and round out features that are already half-built before layering
 more on top.
 
-- [ ] **Enforce `implements`.** Classes already parse and store
-      `implements Interface`, but nothing checks that the class actually
-      implements the interface's methods. Currently decorative.
+- [x] **Enforce `implements`.** A class listing `implements Interface`
+      is now checked at declaration time: the interface has to exist, be
+      a class, and every method it declares has to be provided by the
+      implementing class or something it inherits from.
 - [ ] **Real `Int` vs `Float` types.** Every number is a Python `float`
-      right now. This causes visible inconsistencies today (`print(5)` ->
-      `5`, but `print([5])` -> `[1 = 5.0]`, since table printing doesn't
-      go through the same clean-number formatting as `print`) and will
-      matter a lot more for correctness and performance in the C rewrite.
-- [ ] **Static methods**, to match static fields (`static fun helper() {}`).
-- [ ] **Better overload-resolution errors.** A failed call should list
-      the overloads that *do* exist, not just say "no match."
+      right now, which will matter for correctness and performance in
+      the C rewrite. The visible half of this is fixed - tables print
+      numbers the same way `print` does (`[1 = 5]`, not `[1 = 5.0]`) -
+      but there is still only one numeric type underneath.
+- [x] **Static methods**, to match static fields (`static fun helper() {}`).
+- [x] **Better overload-resolution errors.** A failed call now lists the
+      overloads that do exist, with their parameter types, alongside the
+      argument types that were actually passed.
 - [ ] **A real exception system.** `attempt()` only returns an error
       *message string* today - no exception objects, no stack trace, no
       way to distinguish error kinds without string-matching the
@@ -35,10 +37,15 @@ how often each gets reached for:
 
 - [x] **Strings**: length, split, trim, substring/slice, replace,
       indexOf, upper/lower
-- [ ] **String interpolation** (`"Hello, ${name}"`) instead of `+`-chaining
-- [ ] **Collections**: push/pop/insert/remove, length, sort, contains
-- [ ] **Functional collection ops**: map/filter/reduce (closures already
-      exist - this is where they start paying off)
+- [x] **String interpolation** (`"Hello, ${name}"`) instead of
+      `+`-chaining. Any expression can go in a hole, and values are
+      formatted exactly as `print` would format them (including a type's
+      own `toString()`)
+- [x] **Collections**: push/pop/insert/remove/clear, length, sort,
+      reverse, contains, indexOf, slice, keys/values, join - callable as
+      `table.push(t, x)` or as `t.push(x)`
+- [x] **Functional collection ops**: map/filter/reduce/find (closures
+      already exist - this is where they start paying off)
 - [x] **Math**: abs, floor/ceil/round, sqrt, pow, min/max, random
 - [x] **I/O**: stdin, file read/write - design the sandboxing/permission
       model deliberately here, using the same threat model as the import

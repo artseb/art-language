@@ -23,6 +23,11 @@ class LangClass:
         # instance), evaluated once when the class is declared.
         self.static_fields = {}
 
+        # `static fun f() { ... }`: called on the class itself, so they
+        # never get a `this` - kept apart from `methods` so an instance
+        # can't accidentally bind one as if it were an ordinary method.
+        self.static_methods = {}
+
     def find_method(self, name):
         if name in self.methods:
             return self.methods[name]
@@ -59,6 +64,13 @@ class LangClass:
             return self
         if self.superclass is not None:
             return self.superclass.find_static_owner(name)
+        return None
+
+    def find_static_method(self, name):
+        if name in self.static_methods:
+            return self.static_methods[name]
+        if self.superclass is not None:
+            return self.superclass.find_static_method(name)
         return None
 
     def find_operator(self, op):
@@ -112,6 +124,13 @@ class LangInstance:
         static_owner = self.klass.find_static_owner(name)
         if static_owner is not None:
             return static_owner.static_fields[name]
+
+        # Reachable through an instance for the same reason static
+        # fields are - `this.helper()` reads naturally - but returned
+        # unbound, since a static method has no `this`.
+        static_method = self.klass.find_static_method(name)
+        if static_method is not None:
+            return static_method
 
         raise LangRuntimeError(f"Undefined property '{name}' on instance of {self.klass.name}")
 

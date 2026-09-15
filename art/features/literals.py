@@ -1,8 +1,9 @@
 """Literal values (numbers/strings/true/false/nil - the parser already
-collapses these to a plain Python value) and table literals
-`[1, 2, "k" = v]`."""
+collapses these to a plain Python value), interpolated strings
+(`"Hello, ${name}"`), and table literals `[1, 2, "k" = v]`."""
 from typing import TYPE_CHECKING
 
+from ..errors import ParseError
 from ..tokens import TokenType, register_keyword
 from ..parser.registry import primary_parser
 from ..interpreter.registry import eval_handler
@@ -26,6 +27,18 @@ class Literal(Node):
         return f"Literal({self.value!r})"
 
 
+class Interpolation(Node):
+    """`"a ${b} c"`. `parts` is a list of plain strings and expression
+    nodes; evaluating joins them with the same formatting `print` uses,
+    so `"${5}"` is "5" rather than "5.0" and an instance with a
+    `toString()` speaks for itself."""
+    def __init__(self, parts):
+        self.parts = parts
+
+    def __repr__(self):
+        return f"Interpolation({self.parts!r})"
+
+
 class TableLiteral(Node):
     """Unified array/dict literal. `entries` is a list of
     (key_or_None, value_expr) pairs - key_or_None is None for plain
@@ -44,6 +57,45 @@ class TableLiteral(Node):
 def _parse_literal_value(parser: "Parser"):
     parser._advance()
     return Literal(parser._previous().literal)
+
+
+@primary_parser(TokenType.INTERP_STRING)
+def _parse_interpolated_string(parser: "Parser"):
+    """Each `${ ... }` hole arrives as unparsed source text (the lexer
+    only matched its braces), so parse each one here as a full
+    expression in its own right - which is what makes any expression,
+    not just a bare variable name, legal inside a hole."""
+    from ..lexer import Lexer
+    from ..parser.core import Parser as ArtParser
+
+    parser._advance()
+    token = parser._previous()
+
+    parts = []
+    for part in token.literal:
+        if part[0] == "text":
+            parts.append(part[1])
+            continue
+ 
+        _, source, line, column = part
+
+        # Lex the hole as if it were still sitting where it was written,
+        # so an error inside it points at the real line and column
+        # rather than at "line 1" of a detached fragment.
+        sub_lexer = Lexer(source)
+        sub_lexer.line, sub_lexer.column = line, column
+        sub_parser = ArtParser(sub_lexer.tokenize())
+ 
+        expr = sub_parser._expression()
+        if not sub_parser._at_end():
+            raise ParseError(
+                "Expected a single expression inside '${ ... }'",
+                sub_parser._peek(),
+            )
+
+        parts.append(expr)
+
+    return Interpolation(parts)
 
 
 @primary_parser(TokenType.TRUE)
@@ -97,6 +149,18 @@ def _parse_table_literal(parser: "Parser"):
 @eval_handler(Literal)
 def _eval_literal(interp: "Interpreter", node, env):
     return node.value
+
+
+@eval_handler(Interpolation)
+def _eval_interpolation(interp: "Interpreter", node: Interpolation, env):
+    pieces = []
+    for part in node.parts:
+        if isinstance(part, str):
+            pieces.append(part)
+        else:
+            pieces.append(interp.display(interp._eval(part, env)))
+ 
+    return "".join(pieces)
 
 
 @eval_handler(TableLiteral)
