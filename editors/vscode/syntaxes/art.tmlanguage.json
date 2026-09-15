@@ -46,7 +46,7 @@
       ]
     },
     "string": {
-      "name": "string.quoted.double.art",
+      "contentName": "string.quoted.double.art",
       "begin": "\"",
       "end": "\"",
       "beginCaptures": {
@@ -64,7 +64,9 @@
           "name": "invalid.illegal.unknown-escape.art",
           "match": "\\\\."
         },
-        { "include": "#interpolation" }
+        {
+          "include": "#interpolation"
+        }
       ]
     },
     "interpolation": {
@@ -72,12 +74,34 @@
       "begin": "\\$\\{",
       "end": "\\}",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.template-expression.begin.art" }
+        "0": {
+          "name": "punctuation.definition.template-expression.begin.art"
+        }
       },
       "endCaptures": {
-        "0": { "name": "punctuation.definition.template-expression.end.art" }
+        "0": {
+          "name": "punctuation.definition.template-expression.end.art"
+        }
       },
-      "patterns": [{ "include": "$self" }]
+      "contentName": "meta.embedded.expression.art",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#string" },
+        { "include": "#number" },
+        { "include": "#import" },
+        { "include": "#class-declaration" },
+        { "include": "#enum-declaration" },
+        { "include": "#function-declaration" },
+        { "include": "#accessor-declaration" },
+        { "include": "#operator-overload" },
+        { "include": "#keyword" },
+        { "include": "#constant" },
+        { "include": "#type-annotation" },
+        { "include": "#call" },
+        { "include": "#operator" },
+        { "include": "#punctuation" },
+        { "include": "#variable" }
+      ]
     },
     "number": {
       "name": "constant.numeric.art",
