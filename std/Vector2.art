@@ -7,6 +7,12 @@ class Vector2 {
         this.y = y
     }
 
+    static fun one() { return Vector2(1, 1) }
+    static fun zero() { return Vector2(0, 0) }
+
+    static fun xAxis() { return Vector2(1, 0) }
+    static fun yAxis() { return Vector2(0, 1) }
+
     operator +(other) {
         return Vector2(this.x + other.x, this.y + other.y)
     }
